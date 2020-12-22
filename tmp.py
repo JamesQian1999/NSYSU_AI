@@ -1,13 +1,13 @@
 
-import pygame
-
-start_ticks=pygame.time.get_ticks() #starter tick
-pygame.init()
-while  1: # mainloop
-    seconds=(pygame.time.get_ticks()-start_ticks)/1000 #calculate how many seconds
-    if seconds>10: # if more than 10 seconds close the game
-        break
-    print (seconds) #print how many seconds
+import numpy as np
+ant_map = np.zeros((10, 20), dtype=np.int)
+count = 0
+for i in range(10):
+    for j in range(20):
+        ant_map[i, j] = count
+        count += 1
+ant_map -= 1
+print(ant_map)
 
 # import pygame
 
