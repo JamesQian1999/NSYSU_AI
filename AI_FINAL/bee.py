@@ -10,7 +10,7 @@ FPS = 30                    # update rate
 bee_list=[]                 # number
 flower_list=[]              # flower   
 WHITE = (255, 255, 255)     # white
-GREEN = (34,139,34)         # green
+GREEN = ( 34, 139,  34)     # green
 STEP = 8                    # steps per round
 DETECT_FLOWER = 100         # detected flower
 CONFORM = 10                # conform zoom
@@ -106,7 +106,7 @@ def conform(index,gohome):
                     found = i
                     break
             if found >= 0:
-                bee_list[index].blood += 10
+                bee_list[index].blood += 15
                 bee_list[index].with_flower = True
                 bee_list[index].found_flower = False
                 bee_list[index].flower = [-1,-1]
@@ -145,11 +145,7 @@ def go_specific_place(i,dir=1):
         bee_list[i].y = bee_list[i].y + STEP*y_pn
         bee_list[i].rect.topleft = (bee_list[i].x, bee_list[i].y)
 
-
     conform(i,gohome)
-    
-    
-
 
 
 def walk(bee, p): 
@@ -239,8 +235,6 @@ while True:
             pass
         elif bee_list[i].strategy == 2:
             pass
-        elif bee_list[i].strategy == 3:
-            pass
         else:
             if bee_list[i].get_out:
                 walk(bee_list[i],1)
@@ -265,6 +259,9 @@ while True:
         window_surface.blit(flower_list[i].image, flower_list[i].rect)
         if flower_list[i].take <= 0:
             flower_list.pop(i)
+            x = random.randrange(100,700)
+            y = random.randrange(100,500)
+            flower_list.append(Flower(x, y))
             i -= 1 
         i += 1
 
