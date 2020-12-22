@@ -6,7 +6,7 @@ from pygame.locals import QUIT
 import sys
 
 
-FPS = 30                    # update rate
+FPS = 30                    # update rate 
 bee_list=[]                 # number
 flower_list=[]              # flower   
 WHITE = (255, 255, 255)     # white
