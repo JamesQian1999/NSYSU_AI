@@ -69,16 +69,16 @@ class Bee(pg.sprite.Sprite):
 
 def init():
     global bee_list, flower_list, home
-    bee_list.append(Bee(80, 150, 1,go_eight_flag=True))
+    bee_list.append(Bee(80, 150, 1))
     bee_list.append(Bee(240, 150,go_eight_flag=True))
-    bee_list.append(Bee(400, 150, 1,go_eight_flag=True))
+    bee_list.append(Bee(400, 150, 1))
     bee_list.append(Bee(560, 150,go_eight_flag=True))
-    bee_list.append(Bee(720, 150, 1,go_eight_flag=True))
-    bee_list.append(Bee(80, 450,go_eight_flag=True))
+    bee_list.append(Bee(720, 150, 1))
+    bee_list.append(Bee(80, 450))
     bee_list.append(Bee(240, 450, 1,go_eight_flag=True))
-    bee_list.append(Bee(400, 450,go_eight_flag=True))
+    bee_list.append(Bee(400, 450))
     bee_list.append(Bee(560, 450, 1,go_eight_flag=True))
-    bee_list.append(Bee(720, 450,go_eight_flag=True))
+    bee_list.append(Bee(720, 450))
     tmp = random.randrange(0, len(bee_list), 1)
     x = max(bee_list[tmp].x-DETECT_FLOWER+2, 0)
     y = max(bee_list[tmp].y-DETECT_FLOWER+2, 0)
@@ -215,19 +215,15 @@ def eight(bee):
     bee_map[x, y,1] = 6
     bee_map[x, y,2] = TIME
     bee.go_eight -= 1
-    #print(bee.go_eight)
 
 def walk(bee, p , s = 0): 
     x = bee.x
     y = bee.y
     if p == 2:
-        #print("p = 2 ~~~~~~~~~~~")
         pos = [5,6,7,8][random.randrange(0, len([5,6,7,8]), 1)]
     elif p == 1:
-        #print("p = 1 ~~~~~")
         pos = [1, 2, 3, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8][random.randrange(0, len([1, 2, 3, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]), 1)]
     else:
-        #print("p = 0 ~")
         pos = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 6, 7, 8][random.randrange(0, len([1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 6, 7, 8]), 1)]
 
     if bee.pre_count != 5 and bee.pre_count != -1:
@@ -238,7 +234,6 @@ def walk(bee, p , s = 0):
         bee.pre_count = 0
 
     if s == 1 and bee_map[bee.x,bee.y,0] and bee_map[bee.x,bee.y,2]>0:
-        #print("bee_map")
         pos = 9 - bee_map[bee.x,bee.y,1]
 
     if pos == 1:
@@ -285,7 +280,6 @@ init()
 count = 0
 main_clock = pg.time.Clock()
 while True:
-    # print("")
     global food
     # 偵測事件
     for event in pg.event.get():
@@ -303,7 +297,6 @@ while True:
     i = 0
     while True:
         if i > len(bee_list)-1 or i < 0: break
-        #print("bee[%d]"%i)
         bee_map[:,:,2] -= 1
         found_flower()
 
