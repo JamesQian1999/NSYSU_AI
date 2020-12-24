@@ -12,10 +12,13 @@ flower_list=[]              # flower
 WHITE = (255, 255, 255)     # white
 GREEN = ( 34, 139,  34)     # green
 STEP = 8                    # steps per round
-DETECT_FLOWER = 100         # detected flower
+DETECT_FLOWER = 150         # detected flower
 CONFORM = 10                # conform zoom
 bee_map = np.zeros((800, 600, 3), dtype=np.int) # stamp/dir/time
-STAMP_RANGE = 100
+EIGHT_RANGE = 20
+STAMP_RANGE = 8*EIGHT_RANGE
+TIME = 8*EIGHT_RANGE
+STAMP = 8*EIGHT_RANGE
 
 # creat home object
 class Home(pg.sprite.Sprite):
@@ -43,7 +46,7 @@ class Flower(pg.sprite.Sprite):
 
 # creat Bee object
 class Bee(pg.sprite.Sprite):
-    def __init__(self, x=5, y=5,strategy =-1, time=10,blood = 48):
+    def __init__(self, x=5, y=5,strategy =-1,go_eight_flag=False ,blood = 48):
         super().__init__()
         self.x = x
         self.y = y
@@ -60,20 +63,22 @@ class Bee(pg.sprite.Sprite):
         self.flower = [-1,-1]
         self.get_out = 0
         self.stamp = 0
+        self.go_eight_flag = go_eight_flag
+        self.go_eight = 8*EIGHT_RANGE
 
 
 def init():
     global bee_list, flower_list, home
-    bee_list.append(Bee(80, 150, 1))
-    bee_list.append(Bee(240, 150))
-    bee_list.append(Bee(400, 150, 1))
-    bee_list.append(Bee(560, 150))
-    bee_list.append(Bee(720, 150, 1))
-    bee_list.append(Bee(80, 450))
-    bee_list.append(Bee(240, 450, 1))
-    bee_list.append(Bee(400, 450))
-    bee_list.append(Bee(560, 450, 1))
-    bee_list.append(Bee(720, 450))
+    bee_list.append(Bee(80, 150, 1,go_eight_flag=True))
+    bee_list.append(Bee(240, 150,go_eight_flag=True))
+    bee_list.append(Bee(400, 150, 1,go_eight_flag=True))
+    bee_list.append(Bee(560, 150,go_eight_flag=True))
+    bee_list.append(Bee(720, 150, 1,go_eight_flag=True))
+    bee_list.append(Bee(80, 450,go_eight_flag=True))
+    bee_list.append(Bee(240, 450, 1,go_eight_flag=True))
+    bee_list.append(Bee(400, 450,go_eight_flag=True))
+    bee_list.append(Bee(560, 450, 1,go_eight_flag=True))
+    bee_list.append(Bee(720, 450,go_eight_flag=True))
     tmp = random.randrange(0, len(bee_list), 1)
     x = max(bee_list[tmp].x-DETECT_FLOWER+2, 0)
     y = max(bee_list[tmp].y-DETECT_FLOWER+2, 0)
@@ -106,7 +111,9 @@ def conform(index,gohome):
             if home.collection >= 5:
                 x = random.randrange(100,700)
                 y = random.randrange(100,500)
-                bee_list.append(Bee(x, y))
+                s = random.randrange(0,2)
+                e = random.randrange(0,2)
+                bee_list.append(Bee(x, y,strategy=s,go_eight_flag=e))
                 home.collection = 0
     else:
         if bee_list[index].found_flower and bee_list[index].flower[0]-CONFORM < bee_list[index].x < bee_list[index].flower[0]+CONFORM and bee_list[index].flower[1]-CONFORM < bee_list[index].y < bee_list[index].flower[1]+CONFORM:
@@ -116,9 +123,10 @@ def conform(index,gohome):
                     found = i
                     break
             if found >= 0:
+                if bee_list[index].go_eight_flag: bee_list[index].go_eight = 8*EIGHT_RANGE
                 bee_map[bee_list[index].x,bee_list[index].y,0] = STAMP_RANGE
-                bee_map[bee_list[index].x,bee_list[index].y,2] = 10
-                bee_list[index].stamp = 5
+                bee_map[bee_list[index].x,bee_list[index].y,2] = TIME
+                bee_list[index].stamp = STAMP
                 bee_list[index].blood += 20
                 bee_list[index].with_flower = True
                 bee_list[index].found_flower = False
@@ -140,6 +148,10 @@ def go_specific_place(i,dir=1):
         goto_there = [0,0]
         gohome = True
     
+    if bee_list[i].go_eight_flag and bee_list[i].stamp and bee_list[i].go_eight > 0 and bee_list[i].with_flower:
+        eight(bee_list[i])
+        return
+
     dir = random.randrange(0,3)
     x_pn = np.sign(goto_there[0] - bee_list[i].x)
     y_pn = np.sign(goto_there[1] - bee_list[i].y)
@@ -160,6 +172,50 @@ def go_specific_place(i,dir=1):
 
     conform(i,gohome)
 
+def check(x,y):
+    if x > 799:
+        x = 799
+    if y > 599:
+        y = 599
+    if x < 0:
+        x = 0
+    if y < 0:
+        y = 0
+    return x,y
+
+def eight(bee):
+    x = bee.x
+    y = bee.y
+    r = EIGHT_RANGE
+    if 7*r < bee.go_eight <= 8*r:       # /
+        #print("/")
+        x -= STEP
+        y += STEP
+    elif 5*r < bee.go_eight <= 7*r:     # |
+        #print("|")
+        y -= STEP
+    elif 3*r < bee.go_eight <= 5*r:      # \
+        #print("\\")
+        x += STEP
+        y += STEP
+    elif r < bee.go_eight <= 3*r:       # |
+        #print("|")
+        y -= STEP
+    else:                               # /
+        #print("/")
+        x -= STEP                            
+        y += STEP
+
+    x,y = check(x,y)
+    bee.x = x
+    bee.y = y
+    bee.rect.topleft = (x, y)
+    bee.stamp -= 1
+    bee_map[x, y,0] = bee.stamp
+    bee_map[x, y,1] = 6
+    bee_map[x, y,2] = TIME
+    bee.go_eight -= 1
+    #print(bee.go_eight)
 
 def walk(bee, p , s = 0): 
     x = bee.x
@@ -168,7 +224,7 @@ def walk(bee, p , s = 0):
         #print("p = 2 ~~~~~~~~~~~")
         pos = [5,6,7,8][random.randrange(0, len([5,6,7,8]), 1)]
     elif p == 1:
-        print("p = 1 ~~~~~")
+        #print("p = 1 ~~~~~")
         pos = [1, 2, 3, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8][random.randrange(0, len([1, 2, 3, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]), 1)]
     else:
         #print("p = 0 ~")
@@ -206,14 +262,7 @@ def walk(bee, p , s = 0):
         x += STEP
         y += STEP
 
-    if x > 799:
-        x = 799
-    if y > 599:
-        y = 599
-    if x < 0:
-        x = 0
-    if y < 0:
-        y = 0
+    x,y = check(x,y)
 
     # renew ant object
     bee.x = x
@@ -223,7 +272,7 @@ def walk(bee, p , s = 0):
         bee.stamp -= 1
         bee_map[x,y,0] = bee.stamp
         bee_map[x,y,1] = pos
-        bee_map[x,y,2] = 10
+        bee_map[x,y,2] = TIME
 
 
 
@@ -236,7 +285,7 @@ init()
 count = 0
 main_clock = pg.time.Clock()
 while True:
-    print("")
+    # print("")
     global food
     # 偵測事件
     for event in pg.event.get():
@@ -254,7 +303,7 @@ while True:
     i = 0
     while True:
         if i > len(bee_list)-1 or i < 0: break
-
+        #print("bee[%d]"%i)
         bee_map[:,:,2] -= 1
         found_flower()
 
@@ -262,8 +311,6 @@ while True:
             go_specific_place(i)
         elif bee_list[i].strategy == 1:
             walk(bee_list[i],p=random.randrange(0,2),s=1)
-        elif bee_list[i].strategy == 2:
-            pass
         else:
             if bee_list[i].get_out:
                 walk(bee_list[i],p=2)
@@ -274,6 +321,8 @@ while True:
         window_surface.blit(bee_list[i].image, bee_list[i].rect)
         pg.draw.rect(window_surface, GREEN, pg.Rect(bee_list[i].x-4,bee_list[i].y-5,48,5),1) 
         pg.draw.rect(window_surface, GREEN, pg.Rect(bee_list[i].x-4,bee_list[i].y-5,bee_list[i].blood,5))
+        
+        if bee_list[i].blood<=12: bee_list[i].strategy = 1
 
         if A_second: bee_list[i].blood -= 1
         if not bee_list[i].blood:
